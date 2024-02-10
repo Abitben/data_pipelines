@@ -12,6 +12,7 @@ import pandas as pd
 import zipfile
 import gzip
 from datetime import date
+import os
 
 class FromFileToGCS:
     """
@@ -77,59 +78,76 @@ class FromFileToGCS:
             new_bucket = self.storage_client.create_bucket(bucket, location="europe-west1")
             print('A new bucket created at {}'.format(new_bucket.name))
 
-    def download_and_upload_from_URL(self, url, dest_folder, destination_blob_name):
+    def download_and_upload_from_URLs(self, urls, dest_folder, dest_blob=None):
         """
-        Downloads data from a URL and uploads it to GCS.
+        Downloads data from multiple URLs and uploads them to GCS.
 
         Parameters
         ----------
-            url : str
-                URL of the data to be downloaded
-            destination_blob_name : str
-                name of the blob where the data will be uploaded in GCS
+            urls : list of str
+                URLs of the data to be downloaded
             dest_folder : str
                 name of the folder inside the bucket where the data will be uploaded in GCS
         """
 
-        self.url = url
-        self.folder = dest_folder
-        self.destination_blob_name = destination_blob_name
         today = str(date.today()) + "/"
         dest_folder = dest_folder + "/"
-        self.destination_blob_name_raw = today + dest_folder + destination_blob_name
-        response = requests.get(self.url)
-        if response.status_code == 200:
-            file_stream = BytesIO(response.content)
-            bucket = self.storage_client.bucket(self.bucket_name)
-            blob = bucket.blob(self.destination_blob_name_raw)
-            blob.upload_from_file(file_stream, content_type='application/zip')
-            print(f"{Fore.GREEN}Raw file {self.destination_blob_name} downloaded and uploaded to GCS successfully to {self.destination_blob_name_raw}.{Style.RESET_ALL}")
+        if dest_blob is None:
+            for url in urls:
+                response = requests.get(url)
+                if response.status_code == 200:
+                    file_stream = BytesIO(response.content)
+                    file_name = os.path.basename(url)
+                    destination_blob_name_raw = today + dest_folder + file_name
+                    bucket = self.storage_client.bucket(self.bucket_name)
+                    blob = bucket.blob(destination_blob_name_raw)
+                    blob.upload_from_file(file_stream, content_type='application/zip')
+                    print(f"{Fore.GREEN}Raw file {file_name} downloaded and uploaded to GCS successfully to {destination_blob_name_raw}.{Style.RESET_ALL}")
+                else:
+                    print(f"{Fore.RED}Request for {url} failed with error {response.status_code}.{Style.RESET_ALL}")
         else:
-            print(f"{Fore.RED}Request failed with error {response.status_code}.{Style.RESET_ALL}")
+            for url, destination_blob_name in zip(urls, dest_blob):
+                response = requests.get(url)
+                if response.status_code == 200:
+                    file_stream = BytesIO(response.content)
+                    destination_blob_name_raw = today + dest_folder + destination_blob_name
+                    bucket = self.storage_client.bucket(self.bucket_name)
+                    blob = bucket.blob(destination_blob_name_raw)
+                    blob.upload_from_file(file_stream, content_type='application/zip')
+                    print(f"{Fore.GREEN}Raw file {destination_blob_name} downloaded and uploaded to GCS successfully to {destination_blob_name_raw}.{Style.RESET_ALL}")
+                else:
+                    print(f"{Fore.RED}Request for {url} failed with error {response.status_code}.{Style.RESET_ALL}")
 
-    def local_to_gcs(self, file_path, dest_folder, destination_blob_name):
+    def local_to_gcs(self, file_paths, dest_folder, dest_blob=None):
         """
-        Uploads a local file to GCS.
+            Uploads multiple local files to GCS.
 
-        Parameters
-        ----------
-            file_path : str
-                path of the local file to be uploaded
-            dest_folder : str
-                name of the folder inside the bucket where the data will be uploaded in GCS
-            destination_blob_name : str
-                name of the blob where the data will be uploaded in GCS
-        """
-
-        self.file_path = file_path
+            Parameters
+            ----------
+                file_paths : list of str
+                    paths of the local files to be uploaded
+                dest_folder : str
+                    name of the folder inside the bucket where the data will be uploaded in GCS
+            """
         today = str(date.today()) + "/"
-        self.destination_blob_name = destination_blob_name
         dest_folder = dest_folder + "/"
-        self.destination_blob_name_raw = today + dest_folder + destination_blob_name
-        bucket = self.storage_client.bucket(self.bucket_name)
-        blob = bucket.blob(self.destination_blob_name_raw)
-        blob.upload_from_filename(self.file_path)
-        print(f"{Fore.GREEN}Raw file {self.destination_blob_name} uploaded to GCS successfully to {self.destination_blob_name_raw}.{Style.RESET_ALL}")
+        
+        if dest_blob is None:
+            for file_path in file_paths:
+                file_name = os.path.basename(file_path)
+                destination_blob_name_raw = today + dest_folder + file_name
+                bucket = self.storage_client.bucket(self.bucket_name)
+                blob = bucket.blob(destination_blob_name_raw)
+                blob.upload_from_filename(file_path)
+                print(f"{Fore.GREEN}Raw file {file_name} uploaded to GCS successfully to {destination_blob_name_raw}.{Style.RESET_ALL}")
+        else:
+            for file_path, destination_blob_name in zip(file_paths, dest_blob):
+                destination_blob_name_raw = today + dest_folder + destination_blob_name
+                bucket = self.storage_client.bucket(self.bucket_name)
+                blob = bucket.blob(destination_blob_name_raw)
+                blob.upload_from_filename(file_path)
+                print(f"{Fore.GREEN}Raw file {destination_blob_name} uploaded to GCS successfully to {destination_blob_name_raw}.{Style.RESET_ALL}")
+        
 
     def list_blobs(self):
         """
