@@ -137,8 +137,9 @@ class GetCnilCatalog(GetSourceCatalog):
         Merge additional information into the catalog DataFrame.
         """
         self.df_catalog = self.df_catalog.merge(self.df_dataset[['id', 'slug', 'frequency']], left_on='dataset_id', right_on='id', how='left')
-        self.df_catalog = self.df_catalog.drop(columns=['id', 'frequency_x'])
-        self.df_catalog.rename(columns={'frequency_y': 'frequency', 'slug': 'dataset_name'}, inplace=True)
+        self.df_catalog['dataset_name'] = self.df_catalog['slug']
+        self.df_catalog = self.df_catalog.drop(columns=['id', 'frequency_x', 'slug'])
+        self.df_catalog.rename(columns={'frequency_y': 'frequency'}, inplace=True)
         self.df_catalog.dropna(subset=['table_id'], inplace=True)
         self.df_catalog = self.df_catalog.reset_index()
         return self.df_catalog
