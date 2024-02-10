@@ -95,7 +95,8 @@ class FromFileToGCS:
         self.folder = dest_folder
         self.destination_blob_name = destination_blob_name
         today = str(date.today()) + "/"
-        self.destination_blob_name_raw = today + self.folder + destination_blob_name
+        dest_folder = dest_folder + "/"
+        self.destination_blob_name_raw = today + dest_folder + destination_blob_name
         response = requests.get(self.url)
         if response.status_code == 200:
             file_stream = BytesIO(response.content)
