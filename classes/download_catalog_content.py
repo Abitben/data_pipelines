@@ -95,7 +95,7 @@ class DlCatalogContent:
         Zip all the downloaded files into a single archive.
         """
         try:
-            shutil.make_archive('data/raw_datasets/raw_datasets', 'zip', 'data/raw_datasets')
+            shutil.make_archive('data/raw_datasets', 'zip', 'data/raw_datasets')
             print("All files have been zipped into data/datasets.zip")
         except Exception as e:
             print(f"Error when zipping files : {e}")
