@@ -8,7 +8,6 @@ import io
 from colorama import Fore, Style
 import re
 from unidecode import unidecode
-from IPython.display import display
 
 class ZipFileProcessor:
     def __init__(self, gcs_bucket_name, credentials_path, zip_blob_name, output_folder_name):
@@ -30,7 +29,6 @@ class ZipFileProcessor:
 
         for file_name in filtered_list:
             print(Fore.GREEN + 'current:', file_name + Style.RESET_ALL)
-            df = self.load_and_process_file(zip_file, file_name, bucket)
 
         print("Zip file processed successfully!")
 
@@ -227,9 +225,8 @@ class PrepFilesBQ:
             df = self.open_df(path)
             print('this is df')
             if df is not None:
-                # display(df.head(1))
                 df = self.transposed(df)
-                df = self.drop_empty_columns(df)
+                # df = self.drop_empty_columns(df)
                 df = self.columns_formatter(df)
                 df = self.check_column_clean(df)
                 self.return_csv(df, path)
@@ -264,6 +261,8 @@ class PrepDataCnilBQ(PrepFilesBQ):
             df = df.rename(columns={df.columns[0]: column1})
         else:
             print('More rows than columns, no need to transpose')
+        
+        return df
     
     def columns_formatter(self, df):
         new_columns = []
