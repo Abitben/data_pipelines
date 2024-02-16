@@ -3,6 +3,7 @@ from pandas.errors import ParserError
 from google.oauth2 import service_account
 from google.cloud import storage
 import zipfile
+import tempfile
 import os
 import io
 from colorama import Fore, Style
@@ -285,10 +286,6 @@ class PrepFilesBQ:
                         df = self.columns_formatter(df)
                         df = self.check_column_clean(df)
 
-                        file.name = file.name.replace("-", "_")
-                        file.name = file.name.replace(".", "_")
-                        file.name = file.name.replace(" ", "_")
-                        file.name = file.name + ".csv"
                         csv_output = io.StringIO()
                         df.to_csv(csv_output, index=False, sep=";")
                         csv_output.seek(0)
@@ -304,10 +301,25 @@ class PrepFilesBQ:
 
         # Retourner le fichier zip temporaire en mémoire
         output_zip.seek(0)
+        output_zip = self.replace_char_in_filename(output_zip)
+        output_zip.seek(0)
         return output_zip
-                    
     
+    def replace_char_in_filename(self, zip_file):
+        output_zip = io.BytesIO()
+        with zipfile.ZipFile(zip_file, 'r') as zip_file:
+            with zipfile.ZipFile(output_zip, 'w') as new_zip:
+                for zip_entry in zip_file.infolist():
+                    # Remplacer les espaces par des underscores dans le nom du fichier
+                    new_filename = zip_entry.filename.replace(' ', '_').replace('-', '_').replace(".", "_")
+                    new_filename = new_filename + ".csv"
+                    # Ajouter le fichier au nouveau zip avec le nouveau nom
+                    new_zip.writestr(new_filename, zip_file.read(zip_entry))
 
+        output_zip.seek(0)
+        return output_zip
+
+                    
 class PrepDataCnilBQ(PrepFilesBQ):
 
     def __init__(self, paths):
