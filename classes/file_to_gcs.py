@@ -138,14 +138,14 @@ class FromFileToGCS:
                 destination_blob_name_raw = today + dest_folder + file_name
                 bucket = self.storage_client.bucket(self.bucket_name)
                 blob = bucket.blob(destination_blob_name_raw)
-                blob.upload_from_filename(file_path)
+                blob.upload_from_filename(file_path, timeout=300)
                 print(f"{Fore.GREEN}Raw file {file_name} uploaded to GCS successfully to {destination_blob_name_raw}.{Style.RESET_ALL}")
         else:
             for file_path, destination_blob_name in zip(file_paths, dest_blob):
                 destination_blob_name_raw = today + dest_folder + destination_blob_name
                 bucket = self.storage_client.bucket(self.bucket_name)
                 blob = bucket.blob(destination_blob_name_raw)
-                blob.upload_from_filename(file_path)
+                blob.upload_from_filename(file_path, timeout=300)
                 print(f"{Fore.GREEN}Raw file {destination_blob_name} uploaded to GCS successfully to {destination_blob_name_raw}.{Style.RESET_ALL}")
         
 

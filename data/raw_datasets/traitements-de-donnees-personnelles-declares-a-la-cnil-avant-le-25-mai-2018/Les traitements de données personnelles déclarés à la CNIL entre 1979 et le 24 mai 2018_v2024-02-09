@@ -148,7 +148,7 @@
                                     <a href="/fr/vos-droits-lintervention-humaine-face-votre-profilage-ou-une-decision-automatisee" class="menu-link menu-link-2" data-drupal-link-system-path="node/1345">Faire vérifier une décision automatisée</a>
                       </li>
                 <li class="menu-item menu-item-2">
-                                    <a href="/fr/le-droit-la-limitation-du-traitement-geler-lutilisation-de-vos-donnees" class="menu-link menu-link-2" data-drupal-link-system-path="node/1344">Limiter l&#039;utilisation de mes données</a>
+                                    <a href="/fr/comprendre-mes-droits/le-droit-la-limitation-du-traitement-geler-lutilisation-de-vos-donnees" class="menu-link menu-link-2" data-drupal-link-system-path="node/1344">Limiter l&#039;utilisation de mes données</a>
                       </li>
                 <li class="menu-item menu-item-2">
                                     <a href="/fr/thematiques/les-droits-numeriques-des-mineurs" class="menu-link menu-link-2" data-drupal-link-system-path="node/911">Les droits des mineurs</a>
@@ -358,7 +358,7 @@
   
   
   </div>
-<button data-drupal-selector="edit-submit" class="button js-form-submit form-submit btn-default btn" type="submit" id="edit-submit--2" name="op" value="Rechercher">Rechercher</button><input autocomplete="off" data-drupal-selector="form-ihjsinzkk1pho2kxonxg0zykydizqp5vbqatymspal0" type="hidden" name="form_build_id" value="form-iHJSinZKk1Pho2kxONXG0zYKydizqp5VBqatYmsPAl0" /><input data-drupal-selector="edit-cnil-search-form" type="hidden" name="form_id" value="cnil_search_form" />
+<button data-drupal-selector="edit-submit" class="button js-form-submit form-submit btn-default btn" type="submit" id="edit-submit" name="op" value="Rechercher">Rechercher</button><input autocomplete="off" data-drupal-selector="form-qilxmkqfsf1rub7h3-ktplle-hbjn9y-54enq0xxc8c" type="hidden" name="form_build_id" value="form-QILXmkqfSf1rUB7H3_KtpLLE_HbjN9y-54enq0XXc8c" /><input data-drupal-selector="edit-cnil-search-form" type="hidden" name="form_id" value="cnil_search_form" />
 </form>
 
   </div>

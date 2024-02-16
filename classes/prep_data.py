@@ -8,6 +8,7 @@ import io
 from colorama import Fore, Style
 import re
 from unidecode import unidecode
+from IPython.display import display
 
 class ZipFileProcessor:
     def __init__(self, gcs_bucket_name, credentials_path, zip_blob_name, output_folder_name):
@@ -16,6 +17,14 @@ class ZipFileProcessor:
         self.storage_client = storage.Client(credentials=self.credentials)
         self.zip_blob_name = zip_blob_name
         self.output_folder_name = output_folder_name
+    
+    def get_zip_file_object(self):
+        client = storage.Client()
+        bucket = client.get_bucket(self.gcs_bucket_name)
+        blob = bucket.blob(self.zip_blob_name)
+        zip_bytes = blob.download_as_bytes()
+        zip_file = zipfile.ZipFile(io.BytesIO(zip_bytes))
+        return zip_file
 
     def process_zip_file(self):
         client = storage.Client()
@@ -34,8 +43,9 @@ class ZipFileProcessor:
 
 class PrepFilesBQ:
 
-    def __init__(self, paths):
+    def __init__(self, paths=None, zip_file=None):
         self.paths = paths
+        self.zip_file = zip_file
 
     def verify_error_onbadlines(self, path, df):
         with open(path) as f:
@@ -54,16 +64,21 @@ class PrepFilesBQ:
         
         return df
 
-    def correct_shape(self, path, df):
+    def correct_shape(self, file, df):
         try:
             if df.shape[1] == 1:
                 print('columns shape is 1, csv read with ;')
-                df = pd.read_csv(path, sep=';')
+                print(type(file))
+                if 'zipfile.ZipExtFile' in str(type(file)):
+                    file.seek(0)
+                df = pd.read_csv(file, sep=';')
                 if df.shape[1] == 1:
                     print('try to find headers in 2nd row')
-                    df = pd.read_csv(path, sep=';', skiprows=1)
+                    if 'zipfile.ZipExtFile' in str(type(file)):
+                        file.seek(0)
+                    df = pd.read_csv(file, sep=';', skiprows=1)
                 else:
-                    return df
+                    df = df
             elif 'unnamed' in str(df.columns[1]).lower():
                 print('try to find headers in 2nd row')
                 df.columns = df.iloc[0]
@@ -73,12 +88,10 @@ class PrepFilesBQ:
             print(f"{Fore.RED}Exception: {e}{Style.RESET_ALL}, return None")
             print('cant correct shape')
             df = None
-            return df
         except Exception as e:
             print(f"{Fore.RED}Exception type: {type(e).__name__}{Style.RESET_ALL}")
             print(f"{Fore.RED}Exception: {e}{Style.RESET_ALL}, return None")
             df = None
-            return df
     
         return df
 
@@ -96,15 +109,19 @@ class PrepFilesBQ:
 
         return df
 
-    def open_csv_file(self, path):
+    def open_csv_file(self, path, file):
+        if file is None:
+            file = path
+        print('file:', file)
+        print('path:', path)
         try:
-            df = pd.read_csv(path)
+            df = pd.read_csv(file)
         except ParserError as e:
             print(f"{Fore.RED}Exception type (first attempt): {type(e).__name__}{Style.RESET_ALL}")
             print(e)
             print('trying to open csv with sep = ";"')
             try:
-                df = pd.read_csv(path, sep=';')
+                df = pd.read_csv(file, sep=';')
             except Exception as e:
                 print(f"{Fore.RED}Exception type (second attempt): {type(e).__name__}{Style.RESET_ALL}")
                 print(f"{Fore.RED}Exception: {e}{Style.RESET_ALL}")
@@ -113,15 +130,17 @@ class PrepFilesBQ:
 
         if df is not None:
             print(df.shape)
-            df = self.correct_shape(path, df)
+            df = self.correct_shape(file, df)
             return df
         else:
             return df
 
-    def open_excel_file(self, path):
-        df = pd.read_excel(path)
+    def open_excel_file(self, path, file):
+        if file is None:
+            file = path
+        df = pd.read_excel(file)
         print(df.shape)
-        df = self.correct_shape(path, df)
+        df = self.correct_shape(file, df)
         return df
     
     def columns_formatter(self, df):
@@ -163,29 +182,35 @@ class PrepFilesBQ:
         return df
 
 
-    def open_df(self, path):
+    def open_df(self, path, file=None):
+        if file is None:
+            file = path
+
+        print(file)
+        print(path)
+
         if path.endswith('.csv'):
             print('.csv found')
-            df = self.open_csv_file(path)
+            df = self.open_csv_file(path, file)
         elif path.endswith('.xlsx'):
             print('.xsxl found')
-            df = self.open_excel_file(path)
+            df = self.open_excel_file(path, file)
         elif "." not in path:
             try:
                 try: 
                     print('try to read as csv')
-                    df = self.open_csv_file(path)
+                    df = self.open_csv_file(path, file)
                 except ParserError as e:
                     print(f"{Fore.RED}Exception type: {type(e).__name__}{Style.RESET_ALL}")
                     print(f"{Fore.RED}Exception: {e}{Style.RESET_ALL}")
                     print('try to read as excel')
-                    df = self.open_excel_file(path)
+                    df = self.open_excel_file(path, file)
                     print(df.shape)
                 except UnicodeError as e:
                     print(f"{Fore.RED}Exception type: {type(e).__name__}{Style.RESET_ALL}")
                     print(f"{Fore.RED}Exception: {e}{Style.RESET_ALL}")
                     print('try to read as excel')
-                    df = self.open_excel_file(path)
+                    df = self.open_excel_file(path, file)
                     print(df.shape)
             except Exception as e:
                 print(f"{Fore.RED}Exception type: {type(e).__name__}{Style.RESET_ALL}")
@@ -224,9 +249,10 @@ class PrepFilesBQ:
             print(Fore.GREEN + path + Style.RESET_ALL)
             df = self.open_df(path)
             print('this is df')
+            display(df)
             if df is not None:
                 df = self.transposed(df)
-                # df = self.drop_empty_columns(df)
+                df = self.drop_empty_columns(df)
                 df = self.columns_formatter(df)
                 df = self.check_column_clean(df)
                 self.return_csv(df, path)
@@ -235,6 +261,51 @@ class PrepFilesBQ:
             else:
                 print(Fore.RED + f"{path} not processed!" + Style.RESET_ALL)
                 print("---------------------------------------------------")
+    
+    def process_zip_file(self, zip_file):
+        file_list = [file for file in zip_file.namelist()]
+        filtered_list = list(filter(lambda x: not x.endswith('/'), file_list))
+        output_zip = io.BytesIO()
+
+        with zipfile.ZipFile(output_zip, 'w') as temp_zip:
+            for path in filtered_list:
+                print(Fore.GREEN + 'current:', path + Style.RESET_ALL)
+                with zip_file.open(path) as file:
+                    print("---------------------------------------------------")
+                    print(Fore.GREEN + path + Style.RESET_ALL)
+                    if path == '.DS_Store':
+                        print(Fore.RED + f"{path} not processed!" + Style.RESET_ALL)
+                        print("---------------------------------------------------")
+                        continue
+                    df = self.open_df(path, file)
+                    print('this is df')
+                    if df is not None:
+                        df = self.transposed(df)
+                        df = self.drop_empty_columns(df)
+                        df = self.columns_formatter(df)
+                        df = self.check_column_clean(df)
+
+                        file.name = file.name.replace("-", "_")
+                        file.name = file.name.replace(".", "_")
+                        file.name = file.name.replace(" ", "_")
+                        file.name = file.name + ".csv"
+                        csv_output = io.StringIO()
+                        df.to_csv(csv_output, index=False, sep=";")
+                        csv_output.seek(0)
+
+                        # Ajouter le CSV à l'archive temporaire
+                        temp_zip.writestr(path, csv_output.getvalue())
+
+                        print(Fore.GREEN + f"{path} processed successfully!" + Style.RESET_ALL)
+                        print("---------------------------------------------------")
+                    else:
+                        print(Fore.RED + f"{path} not processed!" + Style.RESET_ALL)
+                        print("---------------------------------------------------")
+
+        # Retourner le fichier zip temporaire en mémoire
+        output_zip.seek(0)
+        return output_zip
+                    
     
 
 class PrepDataCnilBQ(PrepFilesBQ):
