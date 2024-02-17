@@ -131,7 +131,7 @@ class FromFileToGCS:
             """
         today = str(date.today()) + "/"
         dest_folder = dest_folder + "/"
-        
+
         if dest_blob is None:
             for file_path in file_paths:
                 print(file_path)
