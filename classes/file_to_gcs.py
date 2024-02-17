@@ -142,7 +142,7 @@ class FromFileToGCS:
                     blob = bucket.blob(destination_blob_name_raw)
                     blob.upload_from_filename(file_path, timeout=300)
                     print(f"{Fore.GREEN} file {file_name} uploaded to GCS successfully to {destination_blob_name_raw}.{Style.RESET_ALL}")
-                if type(file_path) == io.BytesIO:
+                if type(file_path) == io.BytesIO or type(file_path) == io.StringIO:
                     file_name = 'prep_datasets.zip'
                     destination_blob_name_raw = today + dest_folder + file_name
                     bucket = self.storage_client.bucket(self.bucket_name)
@@ -151,12 +151,31 @@ class FromFileToGCS:
                     print(f"{Fore.GREEN} file {file_name} uploaded to GCS successfully to {destination_blob_name_raw}.{Style.RESET_ALL}")
         else:
             for file_path, destination_blob_name in zip(file_paths, dest_blob):
-                destination_blob_name_raw = today + dest_folder + destination_blob_name
-                bucket = self.storage_client.bucket(self.bucket_name)
-                blob = bucket.blob(destination_blob_name_raw)
-                blob.upload_from_filename(file_path, timeout=300)
-                print(f"{Fore.GREEN} file {destination_blob_name} uploaded to GCS successfully to {destination_blob_name_raw}.{Style.RESET_ALL}")
-        
+                if type(file_path) == io.BytesIO or type(file_path) == io.StringIO:
+                    data = pd.read_csv(file_path, sep=';')
+                    destination_blob_name_raw = today + dest_folder + destination_blob_name
+                    csv_data = data.to_csv(index=False)
+                    bucket = self.storage_client.bucket(self.bucket_name)
+                    blob_output = bucket.blob(destination_blob_name_raw)
+                    blob_output.upload_from_string(csv_data, content_type='text/csv')
+                    print(f"{Fore.GREEN}{destination_blob_name} is uncompressed and uploaded to {destination_blob_name_raw}.{Style.RESET_ALL}")
+
+                    # print(type(file_path))
+                    # print(file_path)
+                    # destination_blob_name_raw = today + dest_folder + destination_blob_name
+                    # bucket = self.storage_client.bucket(self.bucket_name)
+                    # blob = bucket.blob(destination_blob_name_raw)
+                    # blob.upload_from_string(file_path, timeout=300)
+                    # print(f"{Fore.GREEN} file {destination_blob_name} uploaded to GCS successfully to {destination_blob_name_raw}.{Style.RESET_ALL}")
+                else:     
+                    print(type(file_path))
+                    print(file_path)
+                    destination_blob_name_raw = today + dest_folder + destination_blob_name
+                    bucket = self.storage_client.bucket(self.bucket_name)
+                    blob = bucket.blob(destination_blob_name_raw)
+                    blob.upload_from_filename(file_path, timeout=300)
+                    print(f"{Fore.GREEN} file {destination_blob_name} uploaded to GCS successfully to {destination_blob_name_raw}.{Style.RESET_ALL}")
+            
 
     def list_blobs(self):
         """
