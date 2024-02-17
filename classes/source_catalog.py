@@ -96,11 +96,14 @@ class GetSourceCatalog:
 
 class CustomCatalog:
 
-    def __init__(self, service_account):
-        self.service_account = service_account
-        self.dataset_name = "raw_data"
+    def __init__(self, credentials_path, project_id=None, dataset_name=None):
+        self.project_id = project_id
+        self.credentials = service_account.Credentials.from_service_account_file(credentials_path)
+        self.bq_client = bigquery.Client(credentials=self.credentials, project=self.project_id)
+        self.dataset_name = dataset_name
+        
 
-    def create_catalog(self, zip_file):
+    def create_catalog_gcs(self, zip_file):
         file_list = [file for file in zip_file.namelist()]
         catalog = []
         filtered_list = list(filter(lambda x: not x.endswith('/'), file_list))
@@ -132,6 +135,55 @@ class CustomCatalog:
         
         df = pd.DataFrame(catalog)
         return df
+    
+    def bq_catalog_all_datasets(self):
+        print('Getting BigQuery modified dates...')
+
+        dataset_list = list(self.bq_client.list_datasets())
+        dataset_ids = []
+        table_ids = []
+        modified_dates = []
+        for dataset_item in dataset_list:
+            dataset = self.bq_client.get_dataset(dataset_item.reference)
+            tables_list = list(self.bq_client.list_tables(dataset))
+
+            for table_item in tables_list:
+                table = self.bq_client.get_table(table_item.reference)
+                dataset_ids.append(dataset.dataset_id)
+                table_ids.append(table.table_id.lower())
+                modified_dates.append(table.modified)
+        data = {
+            'bq_dataset': dataset_ids,
+            'bq_table': table_ids,
+            'bq_modified': modified_dates
+        }
+        print('Done.')
+        self.df_bq = pd.DataFrame(data)
+        self.df_bq['bq_modified'] = self.df_bq['bq_modified'].dt.tz_localize(None)
+        self.df_bq['bq_table'] = self.df_bq['bq_table'].str.replace(r'_\d{8}', '', regex=True)
+    
+    def bq_raw_catalog(self):
+        print('Getting BigQuery modified dates...')
+
+        table_ids = []
+        modified_dates = []
+        tables_list = list(self.bq_client.list_tables(self.dataset_name))
+
+        for table_item in tables_list:
+            table = self.bq_client.get_table(table_item.reference)
+            table_ids.append(table.table_id.lower())
+            modified_dates.append(table.modified)
+
+        data = {
+            'bq_dataset': self.dataset_name,
+            'bq_table': table_ids,
+            'bq_modified': modified_dates
+            }
+        print('Done.')
+
+        df = pd.DataFrame(data)
+        return df
+
             
 class GetCnilCatalog(GetSourceCatalog):
     """
