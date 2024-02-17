@@ -181,6 +181,22 @@ class PrepFilesBQ:
                 continue
         print("Re-exécution terminée.")
         return df
+    
+    def rename_duplicate_columns(self, df):
+        column_count = {}
+        new_columns = []
+
+        for column in df.columns:
+            if column in column_count:
+                column_count[column] += 1
+                new_column = f"{column}_{column_count[column]}"
+            else:
+                column_count[column] = 1
+                new_column = column
+
+            new_columns.append(new_column)
+        df.columns = new_columns
+        return df
 
 
     def open_df(self, path, file=None):
@@ -256,6 +272,7 @@ class PrepFilesBQ:
                 df = self.drop_empty_columns(df)
                 df = self.columns_formatter(df)
                 df = self.check_column_clean(df)
+                df = self.rename_duplicate_columns(df)
                 self.return_csv(df, path)
                 print(Fore.GREEN + f"{path} processed successfully!" + Style.RESET_ALL)
                 print("---------------------------------------------------")
@@ -285,6 +302,7 @@ class PrepFilesBQ:
                         df = self.drop_empty_columns(df)
                         df = self.columns_formatter(df)
                         df = self.check_column_clean(df)
+                        df = self.rename_duplicate_columns(df)
 
                         csv_output = io.StringIO()
                         df.to_csv(csv_output, index=False, sep=";")
