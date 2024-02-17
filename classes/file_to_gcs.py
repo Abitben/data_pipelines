@@ -134,19 +134,28 @@ class FromFileToGCS:
         
         if dest_blob is None:
             for file_path in file_paths:
-                file_name = os.path.basename(file_path)
-                destination_blob_name_raw = today + dest_folder + file_name
-                bucket = self.storage_client.bucket(self.bucket_name)
-                blob = bucket.blob(destination_blob_name_raw)
-                blob.upload_from_filename(file_path)
-                print(f"{Fore.GREEN}Raw file {file_name} uploaded to GCS successfully to {destination_blob_name_raw}.{Style.RESET_ALL}")
+                print(file_path)
+                if type(file_path) == str:
+                    file_name = os.path.basename(file_path)
+                    destination_blob_name_raw = today + dest_folder + file_name
+                    bucket = self.storage_client.bucket(self.bucket_name)
+                    blob = bucket.blob(destination_blob_name_raw)
+                    blob.upload_from_filename(file_path, timeout=300)
+                    print(f"{Fore.GREEN} file {file_name} uploaded to GCS successfully to {destination_blob_name_raw}.{Style.RESET_ALL}")
+                if type(file_path) == io.BytesIO:
+                    file_name = 'prep_datasets.zip'
+                    destination_blob_name_raw = today + dest_folder + file_name
+                    bucket = self.storage_client.bucket(self.bucket_name)
+                    blob = bucket.blob(destination_blob_name_raw)
+                    blob.upload_from_file(file_path, content_type='application/zip')
+                    print(f"{Fore.GREEN} file {file_name} uploaded to GCS successfully to {destination_blob_name_raw}.{Style.RESET_ALL}")
         else:
             for file_path, destination_blob_name in zip(file_paths, dest_blob):
                 destination_blob_name_raw = today + dest_folder + destination_blob_name
                 bucket = self.storage_client.bucket(self.bucket_name)
                 blob = bucket.blob(destination_blob_name_raw)
-                blob.upload_from_filename(file_path)
-                print(f"{Fore.GREEN}Raw file {destination_blob_name} uploaded to GCS successfully to {destination_blob_name_raw}.{Style.RESET_ALL}")
+                blob.upload_from_filename(file_path, timeout=300)
+                print(f"{Fore.GREEN} file {destination_blob_name} uploaded to GCS successfully to {destination_blob_name_raw}.{Style.RESET_ALL}")
         
 
     def list_blobs(self):

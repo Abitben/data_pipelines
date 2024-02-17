@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import requests
 from datetime import datetime
+import shutil
 
 class DlCatalogContent:
     """
@@ -88,13 +89,13 @@ class DlCatalogContent:
                 except Exception as e:
                     print(f"Error when downloading table {row.table_name} : {e}")
                     continue
-
+    
     def zip_files(self):
         """
         Zip all the downloaded files into a single archive.
         """
         try:
-            os.system('zip -r data/raw_datasets/raw_datasets.zip data/raw_datasets')
+            shutil.make_archive('data/raw_datasets', 'zip', 'data/raw_datasets')
             print("All files have been zipped into data/datasets.zip")
         except Exception as e:
             print(f"Error when zipping files : {e}")

@@ -148,7 +148,7 @@
                                     <a href="/fr/vos-droits-lintervention-humaine-face-votre-profilage-ou-une-decision-automatisee" class="menu-link menu-link-2" data-drupal-link-system-path="node/1345">Faire vérifier une décision automatisée</a>
                       </li>
                 <li class="menu-item menu-item-2">
-                                    <a href="/fr/le-droit-la-limitation-du-traitement-geler-lutilisation-de-vos-donnees" class="menu-link menu-link-2" data-drupal-link-system-path="node/1344">Limiter l&#039;utilisation de mes données</a>
+                                    <a href="/fr/comprendre-mes-droits/le-droit-la-limitation-du-traitement-geler-lutilisation-de-vos-donnees" class="menu-link menu-link-2" data-drupal-link-system-path="node/1344">Limiter l&#039;utilisation de mes données</a>
                       </li>
                 <li class="menu-item menu-item-2">
                                     <a href="/fr/thematiques/les-droits-numeriques-des-mineurs" class="menu-link menu-link-2" data-drupal-link-system-path="node/911">Les droits des mineurs</a>
@@ -358,7 +358,7 @@
   
   
   </div>
-<button data-drupal-selector="edit-submit" class="button js-form-submit form-submit btn-default btn" type="submit" id="edit-submit" name="op" value="Rechercher">Rechercher</button><input autocomplete="off" data-drupal-selector="form-56oivuonkyafac8pcvwieqfi1jkdtk3bfqxl-lg1qce" type="hidden" name="form_build_id" value="form-56OivuoNkYafAc8pCVWieqFi1JKdTK3BFQXl_lg1QcE" /><input data-drupal-selector="edit-cnil-search-form" type="hidden" name="form_id" value="cnil_search_form" />
+<button data-drupal-selector="edit-submit" class="button js-form-submit form-submit btn-default btn" type="submit" id="edit-submit" name="op" value="Rechercher">Rechercher</button><input autocomplete="off" data-drupal-selector="form-jaykf7fa42yfi5pivwhufsyeh3dc2fgdrakbshicbse" type="hidden" name="form_build_id" value="form-jAYkF7fA42yfI5PivWHUFSyeH3dc2FGdrAkbsHiCBSE" /><input data-drupal-selector="edit-cnil-search-form" type="hidden" name="form_id" value="cnil_search_form" />
 </form>
 
   </div>
@@ -798,59 +798,59 @@
 <script src="/core/misc/polyfills/object.assign.js?v=9.5.11"></script>
 <script src="/core/assets/vendor/once/once.min.js?v=1.0.1"></script>
 <script src="/core/assets/vendor/jquery-once/jquery.once.min.js?v=9.5.11"></script>
-<script src="/sites/cnil/files/languages/fr_njQ2icIpYtx2YYskGATGq1FEZlR_WKdCLQP0B_S7ess.js?s7ubh1"></script>
+<script src="/sites/cnil/files/languages/fr_njQ2icIpYtx2YYskGATGq1FEZlR_WKdCLQP0B_S7ess.js?s8qx0s"></script>
 <script src="/core/misc/drupalSettingsLoader.js?v=9.5.11"></script>
 <script src="/core/misc/drupal.js?v=9.5.11"></script>
 <script src="/core/misc/drupal.init.js?v=9.5.11"></script>
 <script src="/modules/contrib/tacjs/assets/vendor/tarteaucitron.js/tarteaucitron.js?v=1.9.9"></script>
 <script src="/modules/contrib/tacjs/assets/vendor/tarteaucitron.js/tarteaucitron.services.js?v=1.9.9"></script>
-<script src="/modules/custom/cnil_tacjs_page/js/lang/tarteaucitron.en.js?s7ubh1"></script>
-<script src="/modules/contrib/tacjs/js/main.js?s7ubh1"></script>
-<script src="/modules/custom/cnil_tacjs_page/js/tarteaucitron.services.js?s7ubh1"></script>
-<script src="/modules/custom/cnil_tacjs_page/js/main.js?s7ubh1"></script>
+<script src="/modules/custom/cnil_tacjs_page/js/lang/tarteaucitron.en.js?s8qx0s"></script>
+<script src="/modules/contrib/tacjs/js/main.js?s8qx0s"></script>
+<script src="/modules/custom/cnil_tacjs_page/js/tarteaucitron.services.js?s8qx0s"></script>
+<script src="/modules/custom/cnil_tacjs_page/js/main.js?s8qx0s"></script>
 <script src="/modules/contrib/datalayer/js/datalayer.js?v=1.x"></script>
 <script src="/modules/contrib/matomo/js/matomo.js?v=9.5.11"></script>
-<script src="/themes/contrib/bootstrap/js/drupal.bootstrap.js?s7ubh1"></script>
-<script src="/themes/contrib/bootstrap/js/attributes.js?s7ubh1"></script>
-<script src="/themes/contrib/bootstrap/js/theme.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_base/js/html5shiv.min.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_base/bootstrap/js/alert.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_base/bootstrap/js/carousel.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_base/bootstrap/js/collapse.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_base/bootstrap/js/dropdown.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_base/bootstrap/js/modal.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_base/bootstrap/js/tooltip.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_base/bootstrap/js/popover.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_base/bootstrap/js/tab.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_base/js/respond.min.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_base/js/page.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/bootstrap/js/alert.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/bootstrap/js/carousel.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/bootstrap/js/collapse.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/bootstrap/js/dropdown.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/bootstrap/js/modal.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/bootstrap/js/tooltip.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/bootstrap/js/popover.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/bootstrap/js/tab.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/js/slick.min.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/js/jquery.mousewheel.min.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/js/respond.min.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/js/jquery.mCustomScrollbar.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/js/page.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/js/header.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/js/accessibility.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/js/main.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/js/display_cookies.js?s7ubh1"></script>
-<script src="/themes/custom/bootstrap_cnil/js/matomo.js?s7ubh1"></script>
-<script src="/modules/custom/cnil_tacjs_page/js/lang/tarteaucitron.fr.js?s7ubh1"></script>
+<script src="/themes/contrib/bootstrap/js/drupal.bootstrap.js?s8qx0s"></script>
+<script src="/themes/contrib/bootstrap/js/attributes.js?s8qx0s"></script>
+<script src="/themes/contrib/bootstrap/js/theme.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_base/js/html5shiv.min.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_base/bootstrap/js/alert.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_base/bootstrap/js/carousel.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_base/bootstrap/js/collapse.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_base/bootstrap/js/dropdown.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_base/bootstrap/js/modal.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_base/bootstrap/js/tooltip.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_base/bootstrap/js/popover.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_base/bootstrap/js/tab.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_base/js/respond.min.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_base/js/page.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/bootstrap/js/alert.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/bootstrap/js/carousel.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/bootstrap/js/collapse.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/bootstrap/js/dropdown.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/bootstrap/js/modal.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/bootstrap/js/tooltip.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/bootstrap/js/popover.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/bootstrap/js/tab.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/js/slick.min.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/js/jquery.mousewheel.min.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/js/respond.min.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/js/jquery.mCustomScrollbar.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/js/page.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/js/header.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/js/accessibility.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/js/main.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/js/display_cookies.js?s8qx0s"></script>
+<script src="/themes/custom/bootstrap_cnil/js/matomo.js?s8qx0s"></script>
+<script src="/modules/custom/cnil_tacjs_page/js/lang/tarteaucitron.fr.js?s8qx0s"></script>
 <script src="/modules/contrib/webform/js/webform.behaviors.js?v=9.5.11"></script>
 <script src="/core/misc/jquery.once.bc.js?v=9.5.11"></script>
 <script src="/core/misc/states.js?v=9.5.11"></script>
-<script src="/themes/contrib/bootstrap/js/misc/states.js?s7ubh1"></script>
+<script src="/themes/contrib/bootstrap/js/misc/states.js?s8qx0s"></script>
 <script src="/modules/contrib/webform/js/webform.states.js?v=9.5.11"></script>
 <script src="/modules/contrib/webform/modules/webform_bootstrap/js/webform_bootstrap.states.js?v=9.5.11"></script>
-<script src="/themes/contrib/bootstrap/js/popover.js?s7ubh1"></script>
-<script src="/themes/contrib/bootstrap/js/tooltip.js?s7ubh1"></script>
+<script src="/themes/contrib/bootstrap/js/popover.js?s8qx0s"></script>
+<script src="/themes/contrib/bootstrap/js/tooltip.js?s8qx0s"></script>
 <script src="/modules/custom/cnil_libraries/library/zeroclipboard/dist/ZeroClipboard.js?v=9.5.11"></script>
 <script src="/modules/custom/cnil_libraries/library/openlayers/OpenLayers.js?v=9.5.11"></script>
 <script src="/core/misc/debounce.js?v=9.5.11"></script>
