@@ -151,3 +151,18 @@ class FromGCStoGBQ:
                   print(f"{Fore.GREEN}{filename} is uploaded to {table_name}{Style.RESET_ALL}")
                 except Exception as e:
                   print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")  
+
+    def df_to_bq(self, df, table_name):
+        """
+        Uploads a DataFrame to BigQuery
+
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            a DataFrame to be uploaded
+        table_name : str
+            a name of the table in BigQuery
+        """
+        table_name = self.project_id + '.' + self.dataset_name + "." + table_name
+        pandas_gbq.to_gbq(df, table_name, project_id=self.project_id, if_exists='replace', api_method= "load_csv")
+        print(f"{Fore.GREEN}DataFrame is uploaded to {table_name}{Style.RESET_ALL}")

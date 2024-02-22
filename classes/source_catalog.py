@@ -4,6 +4,9 @@ from unidecode import unidecode
 import os
 from datetime import date
 import urllib3
+from google.oauth2 import service_account
+from google.cloud import storage, bigquery
+import re
 
 class GetSourceCatalog:
     """
@@ -90,6 +93,98 @@ class GetSourceCatalog:
         self.df_catalog.to_csv(path, index=False)
         print("CSV file has been loaded to this path", path)
 
+
+class CustomCatalog:
+
+    def __init__(self, credentials_path, project_id=None, dataset_name=None):
+        self.project_id = project_id
+        self.credentials = service_account.Credentials.from_service_account_file(credentials_path)
+        self.bq_client = bigquery.Client(credentials=self.credentials, project=self.project_id)
+        self.dataset_name = dataset_name
+        
+
+    def create_catalog_gcs(self, zip_file):
+        file_list = [file for file in zip_file.namelist()]
+        catalog = []
+        filtered_list = list(filter(lambda x: not x.endswith('/'), file_list))
+        for filename in filtered_list:
+            filename_bq = filename.split('/')[1]
+            pattern = "_v(?=\d{4})"
+            split_name = re.split(pattern, filename_bq)
+            filename_bq = unidecode(split_name[0]).lower()
+            date_ext = split_name[1]
+            date_ext = date_ext.replace('.csv', '')
+            if "_csv" in date_ext:
+                ext = "csv"
+                date_date = date_ext.split('_')[0] + '-' + date_ext.split('_')[1] + '-' + date_ext.split('_')[2]
+            elif "_xlsx" in date_ext:
+                ext = "xlsx"
+                date_date = date_ext.split('_')[0] + '-' + date_ext.split('_')[1] + '-' + date_ext.split('_')[2]
+            else:
+                ext = "no extension"
+                date_date = date_ext
+
+            table_name = self.dataset_name + "." + filename_bq
+            dict_table = {
+                'filename': filename_bq,
+                'updated_at': date_date,
+                'source_format': ext,
+                'bq_dest_table': table_name
+                }
+            catalog.append(dict_table)
+        
+        df = pd.DataFrame(catalog)
+        return df
+    
+    def bq_catalog_all_datasets(self):
+        print('Getting BigQuery modified dates...')
+
+        dataset_list = list(self.bq_client.list_datasets())
+        dataset_ids = []
+        table_ids = []
+        modified_dates = []
+        for dataset_item in dataset_list:
+            dataset = self.bq_client.get_dataset(dataset_item.reference)
+            tables_list = list(self.bq_client.list_tables(dataset))
+
+            for table_item in tables_list:
+                table = self.bq_client.get_table(table_item.reference)
+                dataset_ids.append(dataset.dataset_id)
+                table_ids.append(table.table_id.lower())
+                modified_dates.append(table.modified)
+        data = {
+            'bq_dataset': dataset_ids,
+            'bq_table': table_ids,
+            'bq_modified': modified_dates
+        }
+        print('Done.')
+        self.df_bq = pd.DataFrame(data)
+        self.df_bq['bq_modified'] = self.df_bq['bq_modified'].dt.tz_localize(None)
+        self.df_bq['bq_table'] = self.df_bq['bq_table'].str.replace(r'_\d{8}', '', regex=True)
+    
+    def bq_raw_catalog(self):
+        print('Getting BigQuery modified dates...')
+
+        table_ids = []
+        modified_dates = []
+        tables_list = list(self.bq_client.list_tables(self.dataset_name))
+
+        for table_item in tables_list:
+            table = self.bq_client.get_table(table_item.reference)
+            table_ids.append(table.table_id.lower())
+            modified_dates.append(table.modified)
+
+        data = {
+            'bq_dataset': self.dataset_name,
+            'bq_table': table_ids,
+            'bq_modified': modified_dates
+            }
+        print('Done.')
+
+        df = pd.DataFrame(data)
+        return df
+
+            
 class GetCnilCatalog(GetSourceCatalog):
     """
     A class for fetching and processing catalog data from CNIL with additional information.
