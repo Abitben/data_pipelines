@@ -6,19 +6,20 @@ from datetime import datetime
 import shutil
 from google.oauth2 import service_account
 from google.cloud import bigquery
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.firefox.service import Service as FirefoxService
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
+# from selenium import webdriver
+# from selenium.webdriver.common.keys import Keys
+# from selenium.webdriver.common.by import By
+# from selenium.common.exceptions import NoSuchElementException
+# from selenium.webdriver.support.wait import WebDriverWait
+# from selenium.webdriver.support import expected_conditions as EC
+# from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+# from selenium.webdriver.firefox.service import Service as FirefoxService
+# from selenium.webdriver.common.keys import Keys
+# from selenium.webdriver.firefox.options import Options
+# from selenium.webdriver.chrome.service import Service
+# from webdriver_manager.chrome import ChromeDriverManager
 import time
+from bs4 import BeautifulSoup
 
 class DlCatalogContent:
     """
@@ -193,3 +194,38 @@ class GdprSanctionsScrapper:
         else:
             # Format not found, return None
             return None
+
+    def get_sanctions_fr(self):
+        response = requests.get("https://www.cnil.fr/fr/les-sanctions-prononcees-par-la-cnil")
+        url_content = response.content
+        soup = BeautifulSoup(url_content)
+        tbody_list = soup.find_all('tbody')
+
+
+        data = []
+        for tbody in tbody_list:
+            rows = tbody.find_all('tr')
+            for index, row in enumerate(rows):
+                cells = row.find_all(['td'])
+                if len(cells) == 0:
+                    pass
+                elif len(cells) == 4:
+                    decision = {
+                        'date': cells[0].text,
+                        'organisme_type': cells[1].text,
+                        'manquements': cells[2].text,
+                        'decision': cells[3].text,
+                        'theme': None
+                            }
+                elif len(cells) == 5:
+                    decision = {
+                        'date': cells[0].text,
+                        'organisme_type': cells[1].text,
+                        'manquements': cells[3].text,
+                        'decision': cells[4].text, 
+                        'theme': cells[2].text
+                        }
+                data.append(decision)
+
+        df_fr = pd.DataFrame(data)
+        return df_fr

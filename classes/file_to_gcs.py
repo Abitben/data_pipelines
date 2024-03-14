@@ -1,3 +1,4 @@
+from .connectors import GoogleConnector
 from colorama import Fore, Style
 from google.oauth2 import service_account
 # used to interact with GCS
@@ -14,7 +15,7 @@ import gzip
 from datetime import date
 import os
 
-class FromFileToGCS:
+class FromFileToGCS(GoogleConnector):
     """
     A class used to process data from a URL or a local file and upload it to Google Cloud Storage (GCS)
 
@@ -47,7 +48,7 @@ class FromFileToGCS:
         Extracts data from a compressed file and uploads it to GCS
     """
 
-    def __init__(self, bucket_name, credentials_path):
+    def __init__(self, bucket_name, credentials_path, project_id=None):
         """
         Constructs all the necessary attributes for the DataProcessor object.
 
@@ -58,9 +59,8 @@ class FromFileToGCS:
             credentials_path : str
                 path of the service account credentials file
         """
+        super().__init__(credentials_path, project_id)
         self.bucket_name = bucket_name
-        self.credentials = service_account.Credentials.from_service_account_file(credentials_path)
-        self.storage_client = storage.Client(credentials=self.credentials)
 
     def create_bucket(self):
         """

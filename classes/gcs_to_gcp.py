@@ -1,9 +1,8 @@
-import pandas_gbq
+from .connectors import GoogleConnector
 from google.cloud import bigquery
+import pandas_gbq
 from io import StringIO
 from colorama import Fore, Style
-from google.oauth2 import service_account
-from google.cloud import storage
 import requests
 from io import BytesIO
 import io
@@ -14,7 +13,7 @@ import zipfile
 import re
 from unidecode import unidecode
 
-class FromGCStoGBQ:
+class FromGCStoGBQ(GoogleConnector):
     """
     A class used to process data from Google Cloud Storage (GCS) and BigQuery (BQ)
 
@@ -45,7 +44,7 @@ class FromGCStoGBQ:
         Uploads blobs data to BigQuery
     """
 
-    def __init__(self, credentials_path, project_id, dataset_name, bucket_name=None):
+    def __init__(self, credentials_path, project_id, dataset_id, bucket_name=None):
         """
         Constructs all the necessary attributes for the GCS_BQ_Processor object.
 
@@ -60,11 +59,9 @@ class FromGCStoGBQ:
             bucket_name : str
                 Cloud Storage bucket name
         """
-        self.credentials = service_account.Credentials.from_service_account_file(credentials_path)
-        self.bq_client = bigquery.Client(credentials=self.credentials, project=project_id)
-        self.storage_client = storage.Client(credentials=self.credentials)
+        super().__init__(credentials_path, project_id=project_id)
         self.project_id = project_id
-        self.dataset_name = dataset_name
+        self.dataset_id = dataset_id
         self.bucket_name = bucket_name
     
 
@@ -72,7 +69,7 @@ class FromGCStoGBQ:
         """
         Creates a new BigQuery dataset
         """
-        dataset_id = f"{self.project_id}.{self.dataset_name}"
+        dataset_id = f"{self.project_id}.{self.dataset_id}"
         dataset = bigquery.Dataset(dataset_id)
         dataset.location = "EU"
         self.bq_client.create_dataset(dataset, timeout=30, exists_ok=True)
@@ -115,32 +112,36 @@ class FromGCStoGBQ:
         file_list = [file for file in zip_file.namelist()]
         filtered_list = list(filter(lambda x: not x.endswith('/'), file_list))
         for filename in filtered_list:
-            print("---------------------")
-            print(filename)
-            filename_bq = filename.split('/')[1]
-            print(filename_bq)
-            pattern = "_v(?=\d{4})"
-            split_name = re.split(pattern, filename_bq)
-            filename_bq = unidecode(split_name[0]).lower()
-            date_ext = split_name[1]
-            date_ext = date_ext.replace('.csv', '')
-            if "_csv" in date_ext:
-                ext = "csv"
-                date_date = date_ext.split('_')[0] + '-' + date_ext.split('_')[1] + '-' + date_ext.split('_')[2]
-                print(date_date)
-                print(ext)
-            elif "_xlsx" in date_ext:
-                ext = "xlsx"
-                date_date = date_ext.split('_')[0] + '-' + date_ext.split('_')[1] + '-' + date_ext.split('_')[2]
-                print(date_date)
-                print(ext)
+            if "/" in filename: 
+                print("---------------------")
+                print(filename)
+                filename_bq = filename.split('/')[1]
+                print(filename_bq)
+                pattern = "_v(?=\d{4})"
+                split_name = re.split(pattern, filename_bq)
+                filename_bq = unidecode(split_name[0]).lower()
+                date_ext = split_name[1]
+                date_ext = date_ext.replace('.csv', '')
+                if "_csv" in date_ext:
+                    ext = "csv"
+                    date_date = date_ext.split('_')[0] + '-' + date_ext.split('_')[1] + '-' + date_ext.split('_')[2]
+                    print(date_date)
+                    print(ext)
+                elif "_xlsx" in date_ext:
+                    ext = "xlsx"
+                    date_date = date_ext.split('_')[0] + '-' + date_ext.split('_')[1] + '-' + date_ext.split('_')[2]
+                    print(date_date)
+                    print(ext)
+                else:
+                    ext = "csv"
+                    date_date = date_ext
+                    print(date_date)
+                    print(ext)
+                print(filename_bq)
             else:
-                ext = "csv"
-                date_date = date_ext
-                print(date_date)
-                print(ext)
-            print(filename_bq)
-            table_name = self.project_id + '.' + self.dataset_name + "." + filename_bq
+                filename_bq = filename.replace('.csv', '')
+                filename_bq = unidecode(filename_bq).lower()
+            table_name = self.project_id + '.' + self.dataset_id + "." + filename_bq
             print('this is the table name: ', table_name)
             print("---------------------")
                 
@@ -151,6 +152,10 @@ class FromGCStoGBQ:
                   print(f"{Fore.GREEN}{filename} is uploaded to {table_name}{Style.RESET_ALL}")
                 except Exception as e:
                   print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")  
+                  print('try to read with sep=","')
+                  df = pd.read_csv(myfile)
+                  pandas_gbq.to_gbq(df, table_name, project_id=self.project_id, if_exists='replace', api_method= "load_csv")
+                  print(f"{Fore.GREEN}{filename} is uploaded to {table_name}{Style.RESET_ALL}")
 
     def df_to_bq(self, df, table_name):
         """
@@ -163,6 +168,6 @@ class FromGCStoGBQ:
         table_name : str
             a name of the table in BigQuery
         """
-        table_name = self.project_id + '.' + self.dataset_name + "." + table_name
+        table_name = self.project_id + '.' + self.dataset_id + "." + table_name
         pandas_gbq.to_gbq(df, table_name, project_id=self.project_id, if_exists='replace', api_method= "load_csv")
         print(f"{Fore.GREEN}DataFrame is uploaded to {table_name}{Style.RESET_ALL}")

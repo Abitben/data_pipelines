@@ -1,4 +1,5 @@
 import pandas as pd
+from .connectors import GoogleConnector
 from pandas.errors import ParserError
 from google.oauth2 import service_account
 from google.cloud import storage
@@ -13,9 +14,8 @@ from IPython.display import display
 
 class ZipFileProcessor:
     def __init__(self, gcs_bucket_name, credentials_path, zip_blob_name, output_folder_name):
+
         self.gcs_bucket_name = gcs_bucket_name
-        self.credentials = service_account.Credentials.from_service_account_file(credentials_path)
-        self.storage_client = storage.Client(credentials=self.credentials)
         self.zip_blob_name = zip_blob_name
         self.output_folder_name = output_folder_name
     

@@ -1,11 +1,10 @@
+from .connectors import GoogleConnector
 import requests
 import pandas as pd
 from unidecode import unidecode
 import os
 from datetime import date
 import urllib3
-from google.oauth2 import service_account
-from google.cloud import storage, bigquery
 import re
 
 class GetSourceCatalog:
@@ -94,12 +93,11 @@ class GetSourceCatalog:
         print("CSV file has been loaded to this path", path)
 
 
-class CustomCatalog:
+class CustomCatalog(GoogleConnector):
 
     def __init__(self, credentials_path, project_id=None, dataset_name=None):
+        super().__init__(credentials_path)
         self.project_id = project_id
-        self.credentials = service_account.Credentials.from_service_account_file(credentials_path)
-        self.bq_client = bigquery.Client(credentials=self.credentials, project=self.project_id)
         self.dataset_name = dataset_name
         
 
