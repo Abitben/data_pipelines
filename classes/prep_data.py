@@ -12,16 +12,16 @@ import re
 from unidecode import unidecode
 from IPython.display import display
 
-class ZipFileProcessor:
-    def __init__(self, gcs_bucket_name, credentials_path, zip_blob_name, output_folder_name):
-
+class ZipFileProcessor(GoogleConnector):
+    def __init__(self, gcs_bucket_name, credentials_path, zip_blob_name, output_folder_name, project_id = None):
+        super().__init__(credentials_path, project_id)
+        self.bucket_name = gcs_bucket_name
         self.gcs_bucket_name = gcs_bucket_name
         self.zip_blob_name = zip_blob_name
         self.output_folder_name = output_folder_name
     
     def get_zip_file_object(self):
-        client = storage.Client()
-        bucket = client.get_bucket(self.gcs_bucket_name)
+        bucket = self.storage_client.get_bucket(self.gcs_bucket_name)
         blob = bucket.blob(self.zip_blob_name)
         zip_bytes = blob.download_as_bytes()
         zip_file = zipfile.ZipFile(io.BytesIO(zip_bytes))

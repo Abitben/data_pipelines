@@ -16,5 +16,5 @@ class SQLTableUpdater(GoogleConnector):
         return self.df_bq
 
     def compare_tables(self, df=None):
-        
+        pass
         

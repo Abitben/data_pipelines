@@ -6,18 +6,6 @@ from datetime import datetime
 import shutil
 from google.oauth2 import service_account
 from google.cloud import bigquery
-# from selenium import webdriver
-# from selenium.webdriver.common.keys import Keys
-# from selenium.webdriver.common.by import By
-# from selenium.common.exceptions import NoSuchElementException
-# from selenium.webdriver.support.wait import WebDriverWait
-# from selenium.webdriver.support import expected_conditions as EC
-# from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-# from selenium.webdriver.firefox.service import Service as FirefoxService
-# from selenium.webdriver.common.keys import Keys
-# from selenium.webdriver.firefox.options import Options
-# from selenium.webdriver.chrome.service import Service
-# from webdriver_manager.chrome import ChromeDriverManager
 import time
 from bs4 import BeautifulSoup
 
@@ -122,23 +110,17 @@ class DlCatalogContent:
         
 
 class GdprSanctionsScrapper:
+    """ 
+    A simple web scrapper to extract GDPR sanctions from the EU and FR authorities.
+    """
 
-    # def __init__(self, credentials_path, project_id, catalog_path):
-    #     super().__init__(catalog_path)
-    #     self.project_id = project_id
-    #     self.credentials = service_account.Credentials.from_service_account_file(credentials_path)
-    #     self.bq_client = bigquery.Client(credentials=self.credentials, project=project_id)
-
-    # def get_existing_sanction_eu(self):
-    #     self.df_eu = self.bq_client.query("SELECT * FROM `cnil-392113.raw_data.sanctions_eu`").result().to_dataframe()
-    #     return self.df_eu
-
-    # def get_last_record_eu(self):
-    #     self.df_last = self.bq_client.query("SELECT etid_number FROM `cnil-392113.raw_data.sanctions_eu` ORDER BY etid_number DESC").result().to_dataframe()
-    #     self.last_sanc_eu = str(self.df_last['etid_number'].iloc[0])
-    #     return self.last_sanc_eu
     
     def scrap_eu(self):
+        """
+        Scrap the GDPR sanctions from the EU authorities.
+        """
+
+
         url = 'https://www.enforcementtracker.com/data4sfk3j4hwe324kjhfdwe.json?_=1709659660438'
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:123.0) Gecko/20100101 Firefox/123.0',
@@ -178,6 +160,10 @@ class GdprSanctionsScrapper:
         return self.df_eu
         
     def extract_country_name(self, string):
+        """
+        Extract the country name from the string for the EU sanctions.
+        """
+
         match = re.search(r"alt='([^']+)", string)
         if match:
             # Extract the captured group (country name)
@@ -187,6 +173,9 @@ class GdprSanctionsScrapper:
             return None
 
     def extract_href(self, string):
+        """
+        Extract the href attribute from the string for the EU sanctions.
+        """
         match = re.search(r"href='([^']+)", string)
         if match:
             # Extract the captured group (href attribute)
@@ -196,6 +185,9 @@ class GdprSanctionsScrapper:
             return None
 
     def get_sanctions_fr(self):
+        """
+        Extract the GDPR sanctions from the CNIL website upto 2023.
+        """
         response = requests.get("https://www.cnil.fr/fr/les-sanctions-prononcees-par-la-cnil")
         url_content = response.content
         soup = BeautifulSoup(url_content)
