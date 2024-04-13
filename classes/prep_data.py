@@ -12,36 +12,6 @@ import re
 from unidecode import unidecode
 from IPython.display import display
 
-class ZipFileProcessor(GoogleConnector):
-    def __init__(self, gcs_bucket_name, credentials_path, zip_blob_name, output_folder_name, project_id = None):
-        super().__init__(credentials_path, project_id)
-        self.bucket_name = gcs_bucket_name
-        self.gcs_bucket_name = gcs_bucket_name
-        self.zip_blob_name = zip_blob_name
-        self.output_folder_name = output_folder_name
-    
-    def get_zip_file_object(self):
-        bucket = self.storage_client.get_bucket(self.gcs_bucket_name)
-        blob = bucket.blob(self.zip_blob_name)
-        zip_bytes = blob.download_as_bytes()
-        zip_file = zipfile.ZipFile(io.BytesIO(zip_bytes))
-        return zip_file
-
-    def process_zip_file(self):
-        client = storage.Client()
-        bucket = client.get_bucket(self.gcs_bucket_name)
-        blob = bucket.blob(self.zip_blob_name)
-        zip_bytes = blob.download_as_bytes()
-        zip_file = zipfile.ZipFile(io.BytesIO(zip_bytes))
-
-        file_list = [file for file in zip_file.namelist()]
-        filtered_list = list(filter(lambda x: not x.endswith('/'), file_list))
-
-        for file_name in filtered_list:
-            print(Fore.GREEN + 'current:', file_name + Style.RESET_ALL)
-
-        print("Zip file processed successfully!")
-
 class PrepFilesBQ:
 
     def __init__(self, paths=None, zip_file=None):
@@ -205,6 +175,8 @@ class PrepFilesBQ:
 
         print(file)
         print(path)
+
+        df = None
 
         if path.endswith('.csv'):
             print('.csv found')

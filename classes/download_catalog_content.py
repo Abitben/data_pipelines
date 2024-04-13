@@ -8,8 +8,19 @@ from google.oauth2 import service_account
 from google.cloud import bigquery
 import time
 from bs4 import BeautifulSoup
+from .connectors import GoogleConnector
+from pandas.errors import ParserError
+from google.oauth2 import service_account
+from google.cloud import storage
+import zipfile
+import tempfile
+import io
+from colorama import Fore, Style
+from unidecode import unidecode
+from IPython.display import display
 
-class DlCatalogContent:
+
+class DlCatalogContentLocal:
     """
     Class for downloading and organizing datasets based on a provided catalog.
 
@@ -34,37 +45,6 @@ class DlCatalogContent:
 
         if catalog_path is not None:
             self.df_catalog = pd.read_csv(catalog_path)
-
-    def reorganize_file_name(self, file_name, last_date):
-        """
-        Create a new filename with versioning based on the last update date.
-
-        Parameters:
-        - file_name (str): Original filename.
-        - last_date (datetime.date): Last update date.
-
-        Returns:
-        - str: New filename with versioning.
-        """
-        base_name, extension = os.path.splitext(file_name)
-        new_file_name = f'{base_name}_v{last_date}{extension}'
-        return new_file_name
-
-    def extract_date(self, date_str):
-        """
-        Extract and convert date strings to datetime objects.
-
-        Parameters:
-        - date_str (str): Date string in the format '%Y-%m-%dT%H:%M:%S.%f' or '%Y-%m-%dT%H:%M:%S'.
-
-        Returns:
-        - datetime.date: Date extracted from the date string.
-        """
-        try:
-            timestamp_obj = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S.%f')
-        except:
-            timestamp_obj = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S')
-        return timestamp_obj.date()
 
     def get_tables(self):
         """
@@ -96,6 +76,8 @@ class DlCatalogContent:
                 except Exception as e:
                     print(f"Error when downloading table {row.table_name} : {e}")
                     continue
+
+        print(Fore.GREEN + "All files have been downloaded and organized in data/raw_datasets folder." + Style.RESET_ALL)
     
     def zip_files(self):
         """
@@ -103,10 +85,113 @@ class DlCatalogContent:
         """
         try:
             shutil.make_archive('data/raw_datasets', 'zip', 'data/raw_datasets')
-            print("All files have been zipped into data/datasets.zip")
+            print(Fore.GREEN + "All files have been zipped into data/raw_datasets.zip" + Style.RESET_ALL)
         except Exception as e:
-            print(f"Error when zipping files : {e}")
+            print(Fore.RED + f"Error when zipping files : {e}" + Style.RESET_ALL)
             return None
+        
+    def reorganize_file_name(self, file_name, last_date):
+        """
+        Create a new filename with versioning based on the last update date.
+
+        Parameters:
+        - file_name (str): Original filename.
+        - last_date (datetime.date): Last update date.
+
+        Returns:
+        - str: New filename with versioning.
+        """
+        base_name, extension = os.path.splitext(file_name)
+        new_file_name = f'{base_name}_v{last_date}{extension}'
+        return new_file_name
+
+    def extract_date(self, date_str):
+        """
+        Extract and convert date strings to datetime objects.
+
+        Parameters:
+        - date_str (str): Date string in the format '%Y-%m-%dT%H:%M:%S.%f' or '%Y-%m-%dT%H:%M:%S'.
+
+        Returns:
+        - datetime.date: Date extracted from the date string.
+        """
+        try:
+            timestamp_obj = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S.%f')
+        except:
+            timestamp_obj = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S')
+        return timestamp_obj.date()
+    
+
+class DLFromGCSCatalogToZip(GoogleConnector):
+    def __init__(self, gcs_bucket_name, credentials_path, zip_blob_name, project_id = None):
+        super().__init__(credentials_path, project_id)
+        self.bucket_name = gcs_bucket_name
+        self.gcs_bucket_name = gcs_bucket_name
+        self.zip_blob_name = zip_blob_name
+    
+    def get_file_io(self):
+        bucket = self.storage_client.get_bucket(self.gcs_bucket_name)
+        blob = bucket.blob(self.zip_blob_name)
+        return io.BytesIO(blob.download_as_string())
+    
+    def download_files_to_zip_io(self):
+        csv_catalog = self.get_file_io()
+        df_catalog = pd.read_csv(csv_catalog)
+
+        files = []
+        for index, row in df_catalog.iterrows():
+            table_name = row.table_name
+
+            if row.dataset_name is not None:
+              dest_folder = row.dataset_name
+            else:
+              dest_folder = 'unknown'
+
+            if row.last_update is not None:
+                last_date = row.last_update
+                last_date = self.extract_date(last_date)
+            else:
+                current_datetime = datetime.now()
+                last_date = current_datetime.date()
+
+            file_path = f'{dest_folder}/{table_name}_{last_date}'
+
+            if row.download_URL and not pd.isna(row.download_URL):
+              url = row.download_URL
+              response = requests.get(url)
+              if response.status_code == 200:
+                  print('current file downloading :', file_path)
+                  files.append((file_path, response.content))
+              else:
+                  print(f"Failed to download file from {url}")
+        return files
+    
+    def create_zip(self, files):
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
+            for file_path, content in files:
+                print('current file :', file_path)
+                directory, filename = os.path.split(file_path)
+                zip_file.writestr(file_path, content)
+        zip_buffer.seek(0)
+        return zip_buffer
+    
+    def extract_date(self, date_str):
+        """
+        Extract and convert date strings to datetime objects.
+
+        Parameters:
+        - date_str (str): Date string in the format '%Y-%m-%dT%H:%M:%S.%f' or '%Y-%m-%dT%H:%M:%S'.
+
+        Returns:
+        - datetime.date: Date extracted from the date string.
+        """
+        try:
+            timestamp_obj = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S.%f')
+        except:
+            timestamp_obj = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S')
+        return timestamp_obj.date()
+    
         
 
 class GdprSanctionsScrapper:

@@ -117,7 +117,7 @@ class FromGCStoGBQ(GoogleConnector):
                 print(filename)
                 filename_bq = filename.split('/')[1]
                 print(filename_bq)
-                pattern = "_v(?=\d{4})"
+                pattern = "_(?=\d{4})"
                 split_name = re.split(pattern, filename_bq)
                 filename_bq = unidecode(split_name[0]).lower()
                 date_ext = split_name[1]
