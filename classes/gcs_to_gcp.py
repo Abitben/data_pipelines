@@ -117,7 +117,7 @@ class FromGCStoGBQ(GoogleConnector):
                 print(filename)
                 filename_bq = filename.split('/')[1]
                 print(filename_bq)
-                pattern = "_(?=\d{4})"
+                pattern = "_(?=\d{4}_\d{2}_\d{2})"
                 split_name = re.split(pattern, filename_bq)
                 filename_bq = unidecode(split_name[0]).lower()
                 date_ext = split_name[1]
@@ -156,6 +156,11 @@ class FromGCStoGBQ(GoogleConnector):
                   df = pd.read_csv(myfile)
                   pandas_gbq.to_gbq(df, table_name, project_id=self.project_id, if_exists='replace', api_method= "load_csv")
                   print(f"{Fore.GREEN}{filename} is uploaded to {table_name}{Style.RESET_ALL}")
+    
+    def upload_zipio_to_bq(self, zip_file_io):
+        with zipfile.ZipFile(zip_file_io, 'r') as zip_file:
+            self.upload_zip_to_bq(zip_file)
+
 
     def df_to_bq(self, df, table_name):
         """

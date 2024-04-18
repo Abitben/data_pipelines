@@ -96,7 +96,7 @@ class GetSourceCatalog:
 class CustomCatalog(GoogleConnector):
 
     def __init__(self, credentials_path, project_id=None, dataset_name=None):
-        super().__init__(credentials_path)
+        super().__init__(credentials_path, project_id)
         self.project_id = project_id
         self.dataset_name = dataset_name
         

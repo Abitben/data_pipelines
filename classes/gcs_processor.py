@@ -119,6 +119,15 @@ class GCSProcessor(GoogleConnector):
                         csv_data, content_type='text/csv')
                     print(
                         f"{Fore.GREEN}{destination_blob_name} is uploaded to {destination_blob_name}.{Style.RESET_ALL}")
+                elif isinstance(file_path, zipfile.ZipFile):
+                    destination_blob_name = date + dest_folder + destination_blob_name
+                    bucket = self.storage_client.bucket(self.bucket_name)
+                    blob = bucket.blob(destination_blob_name)
+                    io_object = io.BytesIO(file_path)
+                    blob.upload_from_file(
+                        io_object, content_type='application/zip')
+                    print(
+                        f"{Fore.GREEN} file {destination_blob_name} uploaded to GCS successfully to {destination_blob_name}.{Style.RESET_ALL}")
                 elif type(file_path) == io.BytesIO or type(file_path) == io.StringIO:
                     destination_blob_name = date + dest_folder + destination_blob_name
                     bucket = self.storage_client.bucket(self.bucket_name)
@@ -242,11 +251,10 @@ class GCSProcessor(GoogleConnector):
         """
         bucket = self.storage_client.get_bucket(self.bucket_name)
         blob = bucket.blob(blob_name)
-        zip_bytes = blob.download_as_bytes()
-        zip_file = zipfile.ZipFile(io.BytesIO(zip_bytes))
+        zip_file = io.BytesIO(blob.download_as_bytes())
         return zip_file
 
-    def download_files_from_catalog(self, catalog_path):
+    def download_files_from_catalog(self, catalog_path, filter_on=None):
         """
         Downloads files listed in a catalog CSV file and returns their content.
 
@@ -258,6 +266,9 @@ class GCSProcessor(GoogleConnector):
         """
         csv_catalog = self.get_file_string_io(catalog_path)
         df_catalog = pd.read_csv(csv_catalog)
+
+        if filter_on is not None:
+            df_catalog = df_catalog[df_catalog['data_format'] == filter_on]
 
         files = []
         for index, row in df_catalog.iterrows():
@@ -274,17 +285,24 @@ class GCSProcessor(GoogleConnector):
             else:
                 current_datetime = datetime.now()
                 last_date = current_datetime.date()
+            
+            if pd.notna(row.data_format):
+                data_format = "." + row.data_format
+            else:
+                data_format = ''
 
-            file_path = f'{dest_folder}/{table_name}_{last_date}'
+            file_path = f'{dest_folder}/{table_name}_{last_date}{data_format}'
 
-            if row.download_URL and not pd.isna(row.download_URL):
+            if pd.notna(row.download_URL):
                 url = row.download_URL
                 response = requests.get(url)
-            if response.status_code == 200:
-                print('Current file downloading:', file_path)
-                files.append((file_path, response.content))
+                if response.status_code == 200:
+                    print('Current file downloading:', file_path)
+                    files.append((file_path, response.content))
+                else:
+                    print(f"Failed to download file from {url}")
             else:
-                print(f"Failed to download file from {url}")
+                print(f"File {table_name} does not have a download URL.")
         return files
     
     def create_zip_from_files(self, files):
