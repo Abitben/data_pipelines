@@ -2,11 +2,10 @@ import pandas as pd
 import os
 import re
 import requests
-from datetime import datetime
+from datetime import datetime, date
 import shutil
 from google.oauth2 import service_account
 from google.cloud import bigquery
-import time
 from bs4 import BeautifulSoup
 from .connectors import GoogleConnector
 from pandas.errors import ParserError
@@ -83,9 +82,10 @@ class DlCatalogContentLocal:
         """
         Zip all the downloaded files into a single archive.
         """
+        today = datetime.now().strftime('%Y-%m-%d')
         try:
-            shutil.make_archive('data/raw_datasets', 'zip', 'data/raw_datasets')
-            print(Fore.GREEN + "All files have been zipped into data/raw_datasets.zip" + Style.RESET_ALL)
+            shutil.make_archive(f'data/raw_datasets_{today}', 'zip', 'data/raw_datasets')
+            print(Fore.GREEN + f"All files have been zipped into data/raw_datasets_{today}" + Style.RESET_ALL)
         except Exception as e:
             print(Fore.RED + f"Error when zipping files : {e}" + Style.RESET_ALL)
             return None
@@ -234,3 +234,23 @@ class GdprSanctionsScrapper:
 
         df_fr = pd.DataFrame(data)
         return df_fr
+
+    def add_to_zip(self, zip_file):
+        """
+        Add a file to a zip archive.
+        """
+        today = date.today()
+        today 
+
+        df_eu = self.scrap_eu()
+        df_fr = self.get_sanctions_fr()
+
+        with zipfile.ZipFile(zip_file, 'a') as zipf:
+            csv_buffer_eu = df_eu.to_csv(index=False, sep=';')
+            zipf.writestr(f'sanctions/gdpr_eu_sanctions_{today}.csv', csv_buffer_eu)
+            csv_buffer_fr = df_fr.to_csv(index=False, sep=';')
+            zipf.writestr(f'sanctions/gdpr_fr_sanctions_{today}.csv', csv_buffer_fr)
+        
+        if isinstance(zip_file, io.BytesIO):
+            zip_file.seek(0)
+        return zip_file
