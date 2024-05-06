@@ -56,6 +56,7 @@ class DlCatalogContentLocal:
                     dest_folder = f'data/raw_datasets/{row.dataset_name}'
                     os.makedirs(dest_folder, exist_ok=True)
                 else:
+                    os.makedirs('data/raw_datasets/unknown', exist_ok=True)
                     dest_folder = 'data/raw_datasets/unknown'
                     os.makedirs(dest_folder, exist_ok=True)
 
@@ -65,6 +66,7 @@ class DlCatalogContentLocal:
                 else:
                     current_datetime = datetime.now()
                     last_date = current_datetime.date()
+
 
                 try:
                     response = requests.get(row.download_URL)
@@ -215,20 +217,42 @@ class GdprSanctionsScrapper:
                 if len(cells) == 0:
                     pass
                 elif len(cells) == 4:
+                    try:
+                        link = cells[3].find('a')['href']
+                    except:
+                        link = None
+
                     decision = {
                         'date': cells[0].text,
                         'organisme_type': cells[1].text,
                         'manquements': cells[2].text,
                         'decision': cells[3].text,
-                        'theme': None
+                        'theme': None,
+                        'link': link
                             }
                 elif len(cells) == 5:
-                    decision = {
+                    try:
+                        link = cells[4].find('a')['href']
+                    except:
+                        link = None
+
+                    if link:
+                        decision = {
                         'date': cells[0].text,
                         'organisme_type': cells[1].text,
                         'manquements': cells[3].text,
                         'decision': cells[4].text, 
-                        'theme': cells[2].text
+                        'theme': cells[2].text,
+                        'link': link
+                        }
+                    else:
+                        decision = {
+                        'date': cells[0].text,
+                        'organisme_type': cells[1].text,
+                        'manquements': cells[3].text,
+                        'decision': cells[4].text, 
+                        'theme': cells[2].text,
+                        'link': None
                         }
                 data.append(decision)
 

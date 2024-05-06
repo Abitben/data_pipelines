@@ -50,6 +50,20 @@ class PrepFilesBQ:
                 print(Fore.RED + f"{path} not processed!" + Style.RESET_ALL)
                 print("---------------------------------------------------")
 
+    def process_df(self, df):
+        if df is not None:
+            self.dic_errors = {
+                            'path': df,
+                            'error': []
+                        }
+            print("---------------------------------------------------")
+            df = self.transposed(df)
+            df = self.drop_empty_columns(df)
+            df = self.columns_formatter(df)
+            df = self.check_column_clean(df)
+            df = self.rename_duplicate_columns(df)
+            return df
+
     def process_dfs(self, zip_file_io, filter_on=None):
         """
         Processes a zip file containing multiple files.
@@ -272,14 +286,11 @@ class PrepFilesBQ:
         Opens and reads an Excel file.
 
         Args:
-        - path: File path.
         - file: File object or path.
 
         Returns:
         - DataFrame: DataFrame containing Excel data.
         """
-        if file is None:
-            file = path
         df = pd.read_excel(file)
         print(df.shape)
         df = self.correct_shape(file, df)
